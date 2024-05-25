@@ -24,6 +24,8 @@ var prompt string
 
 var awkOptions = []string{"gawk", "awk"}
 
+var cacheDir string
+
 // log without timestamp
 func init() { log.SetFlags(0) }
 
@@ -41,7 +43,12 @@ func main() {
 	}
 
 	task := args[0]
-	filename, inCache := findCachedScriptFile(task)
+	cacheDir, err := getCacheDir()
+	if err != nil {
+		log.Fatal("Gailed getting cache dir: ", err)
+	}
+
+	filename, inCache := findCachedScriptFile(cacheDir, task)
 
 	useCache := inCache && !*noCache
 	printScript := *dry || *debug
@@ -152,13 +159,13 @@ func getAWKScript(task, sampleData string) (string, error) {
 }
 
 // findCachedScriptFile checks if there is a cached script for the task
-func findCachedScriptFile(task string) (string, bool) {
+func findCachedScriptFile(dir, task string) (string, bool) {
 	sum := sha256.Sum256([]byte(task))
 	encoder := base32.StdEncoding.WithPadding(base32.NoPadding)
 	hashedTask := encoder.EncodeToString(sum[:])
 	filename := "awkai-" + hashedTask + ".awk"
 
-	fullFileName := path.Join(os.TempDir(), filename)
+	fullFileName := path.Join(dir, filename)
 	_, err := os.Stat(fullFileName)
 
 	return fullFileName, err == nil
@@ -176,4 +183,27 @@ func findBestAWK() (string, error) {
 	}
 
 	return "", fmt.Errorf("expected to find one of %s", strings.Join(awkOptions, ", "))
+}
+
+// getCacheDir checks if the cache dir exists. If not it creates a new dir called "awkai"
+// it returns the name of the dir
+func getCacheDir() (string, error) {
+	mainCacheDir, err := os.UserCacheDir()
+	if err != nil {
+		return "", err
+	}
+
+	cacheDir = path.Join(mainCacheDir, "awkai", "cache")
+
+	_, err = os.Stat(cacheDir)
+	switch {
+	case os.IsNotExist(err):
+		if err := os.MkdirAll(cacheDir, 0755); err != nil {
+			return "", err
+		}
+	case err != nil:
+		return "", err
+	}
+
+	return cacheDir, nil
 }
