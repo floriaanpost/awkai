@@ -12,8 +12,8 @@ The way it works is that it uses uses openAI's chatGPT (gpt-3.5-turbo) to genera
 
 Lets say you want to find the largest file in this repo, but you are like me and cannot remember the complex commands. Awkai will help you out:
 ```bash
-$ ls -la | awkai "find the largest file"
-Largest File: awkai (7286096 bytes)
+$ ls -la | awkai "format largest file as: filename: size MB"
+awkai: 6 MB
 ```
 
 Another example, lets say you want to search your `$PATH` variable for items that are in your home folder:
