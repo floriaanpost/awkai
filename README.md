@@ -86,3 +86,4 @@ $ go install *.go
 
 - It checks if `gawk` is installed and uses that if it is present. If not, it will check for `awk` and use that if present.
 - In the data folder is some test data that you can use for testing.
+- Sometimes it takes a few tries to get the correct output. Adding the flag `--no-cache` helps to try again.
