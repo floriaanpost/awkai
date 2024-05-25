@@ -1,8 +1,30 @@
 # Awkai
 
-Awkai is a small command line utility that uses openAI's chatGPT (gpt-3.5-turbo) to generate awk scripts and executes it.
+Awkai is a tool to use awk without writing awk scripts. This is great for lazy people that can't remember commands or don't have time to write awk scripts. Some things it does great:
 
-# Usage
+- Process files like CSV
+- Process output from another terminal command
+- Find relevant data in a logfile
+
+The way it works is that it uses uses openAI's chatGPT (gpt-3.5-turbo) to generate awk scripts. These scripts are executed on the data you provide. This tool can be used for everything awk is used for, it only makes using it much easier and faster. See the examples to see what it is capable of.
+
+# Command line helper
+
+Lets say you want to find the largest file in this repo, but you are like me and cannot remember the complex commands. Awkai will help you out:
+```bash
+$ ls -la | awkai "find the largest file"
+Largest File: awkai (7286096 bytes)
+```
+
+Another example, lets say you want to search your `$PATH` variable for items that are in your home folder:
+```bash
+$ echo $PATH | awkai "split by :" | awkai "only lines with /Users/awkai"
+/Users/awkai/.nvm/versions/node/v14.18.1/bin
+/Users/awkai/.cargo/bin
+/Users/awkai/go/bin
+```
+
+# File processing
 
 Lets say we have a CSV file `data.csv` containing the following data:
 |uid |age|firstname|surname |email |
@@ -17,7 +39,7 @@ Lets say we have a CSV file `data.csv` containing the following data:
 You can now use awkai to process this data:
 
 ```bash
-cat data.csv | awkai "Return a new csv with only people using hotmail"
+$ cat data.csv | awkai "return a new csv with only people using hotmail"
 ```
 
 This asks chatGPT for an awk script using your query and the first lines of the data as sample data. This script is used and returns the following data:
@@ -29,7 +51,7 @@ This asks chatGPT for an awk script using your query and the first lines of the 
 You can even chain these commands to find the youngest person using hotmail:
 
 ```bash
-cat data.csv | awkai "Return a new csv with only people using hotmail" | awkai "Find the youngest person"
+$ cat data.csv | awkai "return a new csv with only people using hotmail" | awkai "find the youngest person"
 The youngest person is: Dwain Burt with age 80
 ```
 
@@ -47,7 +69,7 @@ Note that commands are cached, so it won't contact openAI again for the first co
 Clone the repository and create the awkai executable using:
 
 ```bash
-go build *.go
+$ go build *.go
 ```
 
 Make sure `awkai` is somewhere in your path to use it anywhere.
@@ -55,7 +77,7 @@ Make sure `awkai` is somewhere in your path to use it anywhere.
 Another option is use `go install` to put the executable in your `$GOPATH` immediately:
 
 ```bash
-go build *.go
+$ go install *.go
 ```
 
 # Notes
