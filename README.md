@@ -66,6 +66,8 @@ Note that commands are cached, so it won't contact openAI again for the first co
 
 # Installation
 
+You need an [openAI API key](https://platform.openai.com/api-keys). This key needs to be set as an environment variable with name `OPENAI_API_KEY`.
+
 Clone the repository and create the awkai executable using:
 
 ```bash
