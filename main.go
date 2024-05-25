@@ -22,6 +22,8 @@ import (
 //go:embed prompt.txt
 var prompt string
 
+var awkOptions = []string{"gawk", "awk"}
+
 // log without timestamp
 func init() { log.SetFlags(0) }
 
@@ -35,7 +37,7 @@ func main() {
 
 	args := flag.Args()
 	if len(args) != 1 {
-		log.Fatal("You should enter a task that you want to do")
+		log.Fatal("You should enter a command")
 	}
 
 	task := args[0]
@@ -47,7 +49,7 @@ func main() {
 	if printScript && useCache {
 		data, err := os.ReadFile(filename)
 		if err != nil {
-			log.Fatal("Failed reading cached file", err)
+			log.Fatal("Failed reading cached file: ", err)
 		}
 		log.Println(string(data))
 	}
@@ -62,13 +64,13 @@ func main() {
 			lines = append(lines, scanner.Text())
 		}
 		if err := scanner.Err(); err != nil {
-			log.Fatal("Failed reading from stdin", err)
+			log.Fatal("Failed reading from stdin: ", err)
 		}
 
 		sampleData := strings.Join(lines, "\n")
 		script, err := getAWKScript(task, sampleData)
 		if err != nil {
-			log.Fatal("Failed getting AWK script", err)
+			log.Fatal("Failed getting AWK script: ", err)
 		}
 		if printScript {
 			log.Println(script)
@@ -77,13 +79,13 @@ func main() {
 		func() { // used to always close file
 			f, err := os.Create(filename)
 			if err != nil {
-				log.Fatal("Cannot create temp file", err)
+				log.Fatal("Cannot create temp file: ", err)
 			}
 			defer f.Close()
 
 			_, err = f.Write([]byte(script))
 			if err != nil {
-				log.Fatal("Cannot write script to temp file", err)
+				log.Fatal("Cannot write script to temp file: ", err)
 			}
 		}()
 
@@ -96,16 +98,21 @@ func main() {
 		return
 	}
 
+	awk, err := findBestAWK()
+	if err != nil {
+		log.Fatal("Did not find awk: ", err)
+	}
+
 	// execute script
-	cmd := exec.Command("gawk", "-f", filename)
+	cmd := exec.Command(awk, "-f", filename)
 
 	cmd.Stdin = rd
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 
-	err := cmd.Run()
+	err = cmd.Run()
 	if err != nil {
-		log.Fatal("Cannot execute command", err)
+		log.Fatal("Cannot execute command: ", err)
 	}
 }
 
@@ -155,4 +162,18 @@ func findCachedScriptFile(task string) (string, bool) {
 	_, err := os.Stat(fullFileName)
 
 	return fullFileName, err == nil
+}
+
+// findBestAWK checks if gawk is present. If not, it tries to find awk.
+// If both cannot be found, it returns an error
+func findBestAWK() (string, error) {
+	for _, o := range awkOptions {
+		cmd := exec.Command("command", "-v", o)
+		err := cmd.Run()
+		if err == nil {
+			return o, nil
+		}
+	}
+
+	return "", fmt.Errorf("expected to find one of %s", strings.Join(awkOptions, ", "))
 }
