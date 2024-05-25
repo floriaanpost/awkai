@@ -47,4 +47,5 @@ go build -o awkai *.go
 Make sure `awkai` is somewhere in your path to use it anywhere.
 
 # Notes
-It checks if `gawk` is installed and uses that if it is present. If not, it will check for `awk` and use that if present.
+- It checks if `gawk` is installed and uses that if it is present. If not, it will check for `awk` and use that if present.
+- In the data folder is some test data that you can use for testing.
