@@ -34,6 +34,7 @@ func main() {
 	dry := flag.Bool("dry", false, "use dry to print the generated awk script without executing it")
 	noCache := flag.Bool("no-cache", false, "use no-cache if you don't want to use the cached script for the task")
 	sampleLines := flag.Int("lines", 10, "use lines to specify the amount of sample lines the model uses")
+	edit := flag.Bool("edit", false, "use edit if you want to edit the generated script before executing")
 
 	flag.Parse()
 
@@ -99,6 +100,24 @@ func main() {
 
 		// first read sample data and then remaining input
 		rd = io.MultiReader(bytes.NewBufferString(sampleData), os.Stdin)
+	}
+
+	// open for editing if desired
+	if *edit {
+		tty, err := os.OpenFile("/dev/tty", os.O_RDWR, 0) // output to terminal, not stdout
+		if err != nil {
+			log.Fatalf("can't open tty: %s", err)
+		}
+		defer tty.Close()
+
+		cmd := exec.Command("vim", filename)
+		cmd.Stdin = tty
+		cmd.Stdout = tty
+		cmd.Stderr = tty
+
+		if err := cmd.Run(); err != nil {
+			log.Fatal(err)
+		}
 	}
 
 	// if a dry run, don't execute the script
