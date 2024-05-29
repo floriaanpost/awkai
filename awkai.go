@@ -69,6 +69,7 @@ func main() {
 		lineCount := 0
 		for scanner.Scan() && lineCount < *sampleLines {
 			lines = append(lines, scanner.Text())
+			lineCount++
 		}
 		if err := scanner.Err(); err != nil {
 			log.Fatal("Failed reading from stdin: ", err)
@@ -129,7 +130,7 @@ func getAWKScript(task, sampleData string) (string, error) {
 		Model: ModelGPT35Turbo,
 		Messages: []Message{
 			{Role: RoleSystem, Content: prompt},
-			{Role: RoleUser, Content: fmt.Sprintf("Data:\n%s\n\nTask:\n%s", string(sampleData), task)},
+			{Role: RoleUser, Content: fmt.Sprintf("Sample data:\n%s\n\nTask:\n%s", string(sampleData), task)},
 		},
 	}
 
