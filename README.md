@@ -11,12 +11,14 @@ The way it works is that it uses uses openAI's chatGPT (gpt-3.5-turbo) to genera
 # Command line helper
 
 Lets say you want to find the largest file in this repo, but you are like me and cannot remember the complex commands. Awkai will help you out:
+
 ```bash
 $ ls -la | awkai "format largest file as: filename: size MB"
 awkai: 6 MB
 ```
 
 Another example, lets say you want to search your `$PATH` variable for items that are in your home folder:
+
 ```bash
 $ echo $PATH | awkai "split by :" | awkai "only lines with /Users/awkai"
 /Users/awkai/.nvm/versions/node/v14.18.1/bin
@@ -63,6 +65,7 @@ Note that commands are cached, so it won't contact openAI again for the first co
 - `--dry`: This flag is useful if you want to see the generated awk script before executing it to check if it looks correct.
 - `--debug`: Debug is similar to `--dry` but it does execute the awk script. It wil output both the script and the output.
 - `--lines`: Lines is used to tune the amount of sample lines that are given to the LLM to use when generating scripts. 10 Lines are used by default.
+- `--edit`: Open a vi editor to edit the response before executing it.
 
 # Installation
 

@@ -110,7 +110,7 @@ func main() {
 		}
 		defer tty.Close()
 
-		cmd := exec.Command("vim", filename)
+		cmd := exec.Command("vi", filename)
 		cmd.Stdin = tty
 		cmd.Stdout = tty
 		cmd.Stderr = tty
